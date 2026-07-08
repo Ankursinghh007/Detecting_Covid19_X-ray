@@ -2,6 +2,7 @@ import streamlit as st
 import numpy as np
 import tensorflow as tf
 from PIL import Image
+from pathlib import Path
 
 
 # ============================================================
@@ -23,20 +24,11 @@ st.set_page_config(
 st.markdown("""
 <style>
 
-/* ---------------------------------------------------------
-   MAIN PAGE
---------------------------------------------------------- */
-
 .block-container {
     max-width: 900px;
     padding-top: 2rem;
     padding-bottom: 3rem;
 }
-
-
-/* ---------------------------------------------------------
-   REMOVE STREAMLIT EXTRA SPACE
---------------------------------------------------------- */
 
 [data-testid="stAppViewContainer"] {
     background:
@@ -53,9 +45,7 @@ st.markdown("""
 }
 
 
-/* ---------------------------------------------------------
-   HERO HEADER
---------------------------------------------------------- */
+/* HERO HEADER */
 
 .hero-container {
     background: linear-gradient(
@@ -66,11 +56,8 @@ st.markdown("""
     );
 
     border-radius: 22px;
-
-    padding: 45px 30px;
-
+    padding: 42px 25px;
     text-align: center;
-
     margin-bottom: 35px;
 
     box-shadow:
@@ -79,204 +66,151 @@ st.markdown("""
 
 
 .hero-icon {
-    font-size: 48px;
-    margin-bottom: 10px;
+    font-size: 50px;
+    line-height: 1;
+    margin-bottom: 12px;
 }
 
 
 .hero-title {
     color: white;
-
     font-size: 40px;
-
     font-weight: 800;
-
     line-height: 1.2;
-
-    margin-bottom: 12px;
+    margin-bottom: 10px;
 }
 
 
 .hero-subtitle {
-    color: rgba(255, 255, 255, 0.85);
-
+    color: rgba(255, 255, 255, 0.88);
     font-size: 17px;
-
     margin: 0;
 }
 
 
-/* ---------------------------------------------------------
-   SECTION TITLE
---------------------------------------------------------- */
+/* SECTION */
 
 .section-title {
     font-size: 24px;
-
     font-weight: 700;
-
-    margin-top: 30px;
-
-    margin-bottom: 8px;
+    margin-top: 28px;
+    margin-bottom: 7px;
 }
 
 
 .section-description {
     font-size: 16px;
-
     opacity: 0.75;
-
     margin-bottom: 18px;
 }
 
 
-/* ---------------------------------------------------------
-   FILE UPLOADER
---------------------------------------------------------- */
+/* UPLOADER */
 
 [data-testid="stFileUploaderDropzone"] {
-
-    border: 2px dashed rgba(99, 102, 241, 0.55);
-
+    border: 2px dashed rgba(99, 102, 241, 0.60);
     border-radius: 16px;
-
-    padding: 20px;
-
+    padding: 18px;
     transition: 0.2s ease;
 }
 
 
 [data-testid="stFileUploaderDropzone"]:hover {
-
     border-color: rgba(99, 102, 241, 1);
-
-    background: rgba(99, 102, 241, 0.05);
+    background: rgba(99, 102, 241, 0.06);
 }
 
 
-/* ---------------------------------------------------------
-   IMAGE PREVIEW CARD
---------------------------------------------------------- */
-
-.preview-container {
-
-    border-radius: 18px;
-
-    border: 1px solid rgba(128, 128, 128, 0.22);
-
-    padding: 15px;
-
-    margin-top: 10px;
-
-    margin-bottom: 20px;
-}
-
+/* IMAGE */
 
 [data-testid="stImage"] img {
+    border-radius: 16px;
+    border: 1px solid rgba(128, 128, 128, 0.20);
 
-    border-radius: 14px;
+    box-shadow:
+        0 8px 25px rgba(0, 0, 0, 0.10);
 }
 
 
-/* ---------------------------------------------------------
-   BUTTON
---------------------------------------------------------- */
+/* BUTTON */
 
 .stButton > button {
-
     width: 100%;
-
     height: 52px;
-
-    border: none;
 
     border-radius: 13px;
 
     font-size: 17px;
-
     font-weight: 700;
 
-    transition: all 0.2s ease;
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
 }
 
 
 .stButton > button:hover {
-
     transform: translateY(-2px);
 
     box-shadow:
-        0 8px 20px rgba(79, 70, 229, 0.25);
+        0 8px 22px rgba(79, 70, 229, 0.28);
 }
 
 
-/* ---------------------------------------------------------
-   RESULT CARD
---------------------------------------------------------- */
+/* RESULT */
 
 .result-card {
-
     border-radius: 20px;
 
-    border: 1px solid rgba(128, 128, 128, 0.22);
+    border:
+        1px solid rgba(128, 128, 128, 0.22);
 
     padding: 30px 20px;
 
     text-align: center;
 
     margin-top: 15px;
-
-    margin-bottom: 25px;
+    margin-bottom: 20px;
 
     box-shadow:
         0 8px 25px rgba(0, 0, 0, 0.08);
 }
 
 
-.result-small-text {
-
+.result-label {
     font-size: 13px;
-
     letter-spacing: 1.5px;
-
     opacity: 0.65;
-
     margin-bottom: 8px;
 }
 
 
 .result-class {
-
     font-size: 34px;
-
     font-weight: 800;
-
     margin-bottom: 10px;
 }
 
 
 .result-score {
-
     font-size: 17px;
-
-    opacity: 0.8;
+    opacity: 0.85;
 }
 
 
-/* ---------------------------------------------------------
-   PROBABILITY CARD
---------------------------------------------------------- */
+/* PROBABILITY CARDS */
 
 .probability-card {
-
     border-radius: 16px;
 
-    border: 1px solid rgba(128, 128, 128, 0.22);
+    border:
+        1px solid rgba(128, 128, 128, 0.22);
 
-    padding: 22px 15px;
+    padding: 22px 12px;
 
     text-align: center;
 
-    min-height: 120px;
+    min-height: 115px;
 
     box-shadow:
         0 5px 18px rgba(0, 0, 0, 0.05);
@@ -284,32 +218,25 @@ st.markdown("""
 
 
 .probability-label {
-
     font-size: 15px;
-
-    opacity: 0.7;
-
-    margin-bottom: 7px;
+    opacity: 0.70;
+    margin-bottom: 8px;
 }
 
 
-.probability-number {
-
+.probability-value {
     font-size: 29px;
-
     font-weight: 800;
 }
 
 
-/* ---------------------------------------------------------
-   MODEL INFORMATION
---------------------------------------------------------- */
+/* MODEL CARD */
 
 .model-card {
-
     border-radius: 18px;
 
-    border: 1px solid rgba(128, 128, 128, 0.22);
+    border:
+        1px solid rgba(128, 128, 128, 0.22);
 
     padding: 25px;
 
@@ -321,9 +248,7 @@ st.markdown("""
 
 
 .model-row {
-
     display: flex;
-
     justify-content: space-between;
 
     gap: 20px;
@@ -336,31 +261,24 @@ st.markdown("""
 
 
 .model-row:last-child {
-
     border-bottom: none;
 }
 
 
 .model-label {
-
     font-weight: 700;
 }
 
 
 .model-value {
-
+    opacity: 0.80;
     text-align: right;
-
-    opacity: 0.8;
 }
 
 
-/* ---------------------------------------------------------
-   FOOTER
---------------------------------------------------------- */
+/* FOOTER */
 
 .footer {
-
     text-align: center;
 
     opacity: 0.55;
@@ -376,65 +294,60 @@ st.markdown("""
 }
 
 
-/* ---------------------------------------------------------
-   MOBILE RESPONSIVE
---------------------------------------------------------- */
+/* MOBILE */
 
 @media (max-width: 600px) {
 
     .block-container {
-
         padding-top: 1rem;
-
         padding-left: 1rem;
-
         padding-right: 1rem;
     }
 
 
     .hero-container {
-
-        padding: 35px 15px;
-
+        padding: 32px 15px;
         border-radius: 18px;
     }
 
 
     .hero-title {
-
         font-size: 29px;
     }
 
 
     .hero-subtitle {
-
         font-size: 15px;
     }
 
 
     .result-class {
-
         font-size: 28px;
     }
 
 
     .model-row {
-
         flex-direction: column;
-
         gap: 5px;
     }
 
 
     .model-value {
-
         text-align: left;
     }
-
 }
 
 </style>
 """, unsafe_allow_html=True)
+
+
+# ============================================================
+# MODEL PATH
+# ============================================================
+
+BASE_DIR = Path(__file__).resolve().parent
+
+MODEL_PATH = BASE_DIR / "model.keras"
 
 
 # ============================================================
@@ -444,8 +357,21 @@ st.markdown("""
 @st.cache_resource
 def load_covid_model():
 
+    if not MODEL_PATH.exists():
+
+        available_files = [
+            file.name
+            for file in BASE_DIR.iterdir()
+        ]
+
+        raise FileNotFoundError(
+            f"Model not found at {MODEL_PATH}. "
+            f"Available files: {available_files}"
+        )
+
     loaded_model = tf.keras.models.load_model(
-        "model.keras"
+        str(MODEL_PATH),
+        compile=False
     )
 
     return loaded_model
@@ -458,7 +384,7 @@ try:
 
 except Exception as error:
 
-    st.error("Failed to load model.keras")
+    st.error("Unable to load the trained model.")
 
     st.exception(error)
 
@@ -468,10 +394,6 @@ except Exception as error:
 # ============================================================
 # HERO HEADER
 # ============================================================
-
-# IMPORTANT:
-# HTML lines are intentionally not indented.
-# This prevents Streamlit from showing HTML as code.
 
 hero_html = """
 <div class="hero-container">
@@ -491,22 +413,20 @@ st.markdown(
 # UPLOAD SECTION
 # ============================================================
 
-upload_title = """
+upload_html = """
 <div class="section-title">📤 Upload Chest X-Ray</div>
-<div class="section-description">
-Select a chest X-ray image to classify it as COVID-19 or Normal.
-</div>
+<div class="section-description">Select a chest X-ray image to classify it as COVID-19 or Normal.</div>
 """
 
 st.markdown(
-    upload_title,
+    upload_html,
     unsafe_allow_html=True
 )
 
 
 uploaded_file = st.file_uploader(
 
-    "Upload X-Ray Image",
+    "Upload Chest X-Ray Image",
 
     type=[
         "jpg",
@@ -524,41 +444,27 @@ uploaded_file = st.file_uploader(
 
 def preprocess_image(uploaded_image):
 
-    # Open uploaded image
-
     original_image = Image.open(
         uploaded_image
     ).convert("RGB")
 
-
-    # Resize according to CNN input
 
     resized_image = original_image.resize(
         (299, 299)
     )
 
 
-    # Convert into NumPy array
-
     image_array = np.asarray(
-
         resized_image,
-
         dtype=np.float32
     )
 
 
-    # Normalize pixel values
-
     image_array = image_array / 255.0
 
 
-    # Add batch dimension
-
     image_array = np.expand_dims(
-
         image_array,
-
         axis=0
     )
 
@@ -567,7 +473,7 @@ def preprocess_image(uploaded_image):
 
 
 # ============================================================
-# UPLOADED IMAGE
+# IMAGE UPLOAD AND PREDICTION
 # ============================================================
 
 if uploaded_file is not None:
@@ -580,23 +486,21 @@ if uploaded_file is not None:
 
 
         # ====================================================
-        # IMAGE PREVIEW
+        # PREVIEW
         # ====================================================
 
-        preview_title = """
+        preview_html = """
 <div class="section-title">🩻 X-Ray Preview</div>
-<div class="section-description">
-Review the uploaded image before running the model.
-</div>
+<div class="section-description">Review the uploaded chest X-ray image before running the model.</div>
 """
 
         st.markdown(
-            preview_title,
+            preview_html,
             unsafe_allow_html=True
         )
 
 
-        left_column, image_column, right_column = st.columns(
+        left_space, image_column, right_space = st.columns(
             [1, 2.2, 1]
         )
 
@@ -604,18 +508,16 @@ Review the uploaded image before running the model.
         with image_column:
 
             st.image(
-
                 original_image,
-
                 use_container_width=True
             )
 
 
         # ====================================================
-        # PREDICT BUTTON
+        # BUTTON
         # ====================================================
 
-        predict_button = st.button(
+        analyze_button = st.button(
 
             "🔍 Analyze Chest X-Ray",
 
@@ -626,57 +528,62 @@ Review the uploaded image before running the model.
 
 
         # ====================================================
-        # RUN PREDICTION
+        # PREDICTION
         # ====================================================
 
-        if predict_button:
+        if analyze_button:
 
             with st.spinner(
                 "Analyzing chest X-ray..."
             ):
 
                 raw_prediction = model.predict(
-
                     processed_image,
-
                     verbose=0
                 )
 
 
-                probability = float(
+            # The trained model has one sigmoid output.
 
-                    raw_prediction[0][0]
+            probability = float(
+                np.squeeze(raw_prediction)
+            )
+
+
+            # Prevent invalid percentage values.
+
+            probability = float(
+                np.clip(
+                    probability,
+                    0.0,
+                    1.0
                 )
+            )
 
 
-            # ================================================
+            # =================================================
             # CLASS MAPPING
             #
-            # Training:
+            # Training classes:
             #
-            # COVID  = 0
-            # NORMAL = 1
+            # covid  = 0
+            # normal = 1
             #
-            # ================================================
-
+            # Therefore:
+            #
+            # output < 0.5  => COVID-19
+            # output >= 0.5 => NORMAL
+            # =================================================
 
             covid_probability = (
-
                 1.0 - probability
-
-            ) * 100
+            ) * 100.0
 
 
             normal_probability = (
-
                 probability
+            ) * 100.0
 
-            ) * 100
-
-
-            # ================================================
-            # DETERMINE CLASS
-            # ================================================
 
             if probability >= 0.5:
 
@@ -696,81 +603,56 @@ Review the uploaded image before running the model.
                 result_icon = "⚠️"
 
 
-            # ================================================
-            # RESULT TITLE
-            # ================================================
+            # =================================================
+            # RESULT
+            # =================================================
 
-            result_title = """
+            result_heading_html = """
 <div class="section-title">📊 Analysis Result</div>
-<div class="section-description">
-Prediction generated by the trained CNN model.
-</div>
+<div class="section-description">Prediction generated by the trained CNN model.</div>
 """
 
             st.markdown(
-
-                result_title,
-
+                result_heading_html,
                 unsafe_allow_html=True
             )
 
 
-            # ================================================
-            # RESULT CARD
-            # ================================================
-
             result_html = f"""
 <div class="result-card">
-<div class="result-small-text">PREDICTED CLASS</div>
+<div class="result-label">PREDICTED CLASS</div>
 <div class="result-class">{result_icon} {predicted_class}</div>
 <div class="result-score">Prediction Score: <b>{prediction_score:.2f}%</b></div>
 </div>
 """
 
-
             st.markdown(
-
                 result_html,
-
                 unsafe_allow_html=True
             )
 
 
-            # ================================================
-            # PREDICTION SCORE BAR
-            # ================================================
+            # =================================================
+            # SCORE BAR
+            # =================================================
 
             st.write("**Prediction Score**")
 
-
             st.progress(
-
-                min(
-
-                    max(
-
-                        prediction_score / 100,
-
-                        0.0
-                    ),
-
-                    1.0
-                )
+                prediction_score / 100.0
             )
 
 
-            # ================================================
-            # PROBABILITIES
-            # ================================================
+            # =================================================
+            # CLASS PROBABILITIES
+            # =================================================
 
-            probability_title = """
+            probability_heading_html = """
 <div class="section-title">📈 Class Probabilities</div>
 """
 
             st.markdown(
-
-                probability_title,
-
+                probability_heading_html,
                 unsafe_allow_html=True
             )
 
@@ -783,14 +665,12 @@ Prediction generated by the trained CNN model.
                 covid_html = f"""
 <div class="probability-card">
 <div class="probability-label">COVID-19 Probability</div>
-<div class="probability-number">{covid_probability:.2f}%</div>
+<div class="probability-value">{covid_probability:.2f}%</div>
 </div>
 """
 
                 st.markdown(
-
                     covid_html,
-
                     unsafe_allow_html=True
                 )
 
@@ -800,14 +680,12 @@ Prediction generated by the trained CNN model.
                 normal_html = f"""
 <div class="probability-card">
 <div class="probability-label">Normal Probability</div>
-<div class="probability-number">{normal_probability:.2f}%</div>
+<div class="probability-value">{normal_probability:.2f}%</div>
 </div>
 """
 
                 st.markdown(
-
                     normal_html,
-
                     unsafe_allow_html=True
                 )
 
@@ -825,23 +703,21 @@ Prediction generated by the trained CNN model.
 # MODEL INFORMATION
 # ============================================================
 
-st.markdown("<br>", unsafe_allow_html=True)
+st.markdown(
+    "<br>",
+    unsafe_allow_html=True
+)
 
 st.divider()
 
 
-model_title = """
+model_heading_html = """
 <div class="section-title">🤖 Model Information</div>
-<div class="section-description">
-Technical details of the deployed image classification model.
-</div>
+<div class="section-description">Technical details of the deployed image classification model.</div>
 """
 
-
 st.markdown(
-
-    model_title,
-
+    model_heading_html,
     unsafe_allow_html=True
 )
 
@@ -875,11 +751,8 @@ model_information_html = """
 </div>
 """
 
-
 st.markdown(
-
     model_information_html,
-
     unsafe_allow_html=True
 )
 
@@ -894,10 +767,7 @@ CNN-Based Chest X-Ray Image Classification Project
 </div>
 """
 
-
 st.markdown(
-
     footer_html,
-
     unsafe_allow_html=True
 )
